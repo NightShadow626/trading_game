@@ -1,0 +1,28 @@
+commence avec 10$
+plusieurs entreprises (plus ou moins grande avec des prix d'action differentes)
+regarder pour avoir des courbes reel (tendance / pattern) generation à voir pour que ça ne soit pas trop rapide ni trop lent (500 actions max)
+plusieurs style de courbe (plusieurs couleurs / style graph)
+pouvoir changer l'arriere plan
+generer les noms d'entreprises avec chatgpt
+creation de plusieurs fenetre :
+	courbe, bouton achat/vente, nombre d'action pour chaque entreprise, argent en banque, argent investit(valeur actuelle de toute les actions),  nom entreprise avec cout action + derniere variation
+
+
+
+
+
+
+code triche pour avoir de l'argent
+easter egg (entreprise caché)
+achievment / reward (100$ / jouer 1h d'affiller / gagner 1000$ sans avoir d'action qui baisse)
+
+
+
+
+
+
+
+
+version internet (javascript / html / css) -> github
+version mobile
+pouvoir avoir un graph 3d
