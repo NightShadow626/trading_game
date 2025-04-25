@@ -1,1 +1,0 @@
-#Fonctions utiles (formatage, génération de noms…)

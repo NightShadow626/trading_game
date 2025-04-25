@@ -14,19 +14,13 @@ Système de sauvegarde/chargement (crypté ou pas) pour pouvoir saugarder sa par
 (code triche pour avoir de l'argent / easter egg (entreprise caché) / reward (100$ ; jouer 1h d'affiller ; gagner 1000$ sans avoir d'action qui baisse) / version internet (javascript / html / css) / version mobile / pouvoir avoir un graph 3d)
 
 
-planning :
-Semaine	 	Objectif
-Semaine 1	Backend : classes, génération d’entreprises et des courbes
-Semaine 2	Interface Tkinter basique avec graph + boutons
-Semaine 3	Ajouts visuels, gestion des achats/ventes, test complet
-Semaine 4	Détails bonus, polish, commentaires
 
 
-realisation de classe pour les entreprise et pour le joueur
+realisation de classe pour les entreprise et pour le joueur (POO)
 generation boursiere tendances réalistes et/ou aléatoire
 voir si il y a possibiliter de mettre du matplotlib avec tkinter
 mettre une sorte de calendrier pour voir le jour et avec les bouton pour le jour/moi/annee suivante
-voir si on rajoute une fin ou non
-peut-etre different mode (facile ; moyen ; difficile ; hardcore) qui va etre modifier par different parametre (incidence des entreprise sur les autre, des crise plus ou moins rapproché, des variation plus ou moins aleatoire
+pas de fin
+peut-etre different mode (facile ; moyen ; difficile ; hardcore) qui va etre modifier par different parametre (incidence des entreprise sur les autre, des crise plus ou moins rapproché, des variation plus ou moins aleatoire)
 si on veux vraiment ce deter on peux mettre de la musique de fond
-on peux limite aussi mettre un graphique genre dans une fenetre profil avec la courbe des gain du joueur
+on peux limite aussi mettre un graphique genre dans une fenetre profil avec la courbe des gain du joueur + stat en dessous
