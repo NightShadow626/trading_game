@@ -1,2 +1,2 @@
-affichage matplotlib avecx tkinter
-et affichage temps reel
+affichage matplotlib avec tkinter
+Les courbes changeaient de couleur → corrigé en mettant à jour les lignes existantes sans en recréer.
