@@ -6,9 +6,15 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk as Navigation
 from matplotlib.figure import Figure
 import tkinter as tk
 from tkinter import ttk
+import json
+import os
+from datetime import datetime
+
 
 from courbes import generer_pourcentage_augmentation, application_variation
 from utils import Entreprise, generer_liste_entreprises, Portefeuille
+from sauvegardes import sauvegarder_partie, charger_partie, lister_sauvegardes
+
 
 LARGE_FONT = ("Verdana", 12)
 
@@ -18,6 +24,11 @@ config = {
     "style_courbe": "ligne",
     "couleurs": {}  # Nom de l'entreprise -> couleur choisie
 }
+
+DOSSIER_SAUVEGARDES = "saves"
+os.makedirs(DOSSIER_SAUVEGARDES, exist_ok=True)
+
+portefeuille = Portefeuille()
 
 
 
@@ -39,8 +50,8 @@ class Ecran(tk.Tk):
         self.frames = {}
 
         for F in (StartPage, PageOne, PageTwo, PageThree):
-            if F == PageThree or F == PageTwo:
-                frame = F(container, self, entreprises)  # Passer la liste d'entreprises à PageThree
+            if F == PageThree or F == PageTwo or F == PageOne:
+                frame = F(container, self, entreprises, portefeuille)
             else:
                 frame = F(container, self)
             self.frames[F] = frame
@@ -107,7 +118,9 @@ class StartPage(tk.Frame):
 
 
 class PageOne(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, entreprises, portefeuille):
+        self.entreprises = entreprises
+        self.portefeuille = portefeuille
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
@@ -122,9 +135,84 @@ class PageOne(tk.Frame):
                              style="TButton")
         button2.pack()
 
+        tk.Button(self, text="💾 Sauvegarder", command=lambda: self.sauvegarder_partie_utilisateur("ma_sauvegarde")).pack()
+        tk.Button(self, text="📂 Charger", command=lambda: self.charger_partie_utilisateur("ma_sauvegarde")).pack()
+        global config
+
+    def sauvegarder_partie_utilisateur(self, nom):
+        global config
+        dico_entreprises = {}
+        joueur = {
+            "argent": self.portefeuille.get_argent(),
+            "portefeuille": self.portefeuille.get_actions()
+        }
+        print(self.entreprises)
+        for i in range(len(self.entreprises) - 1):
+            dico_entreprises[self.entreprises[i].get_nom()] = self.entreprises[i].get_historique()
+        parametres = config
+
+        sauvegarder_partie(nom, joueur, dico_entreprises, parametres)
+        print(f"✅ Partie '{nom}' sauvegardée !")
+
+
+    def charger_partie_utilisateur(self, nom):
+        global config
+        donnees = charger_partie(nom)
+        if donnees:
+            self.portefeuille.modifier_argent(donnees["joueur"]["argent"])
+            self.portefeuille.modifier_actions(donnees["joueur"]["portefeuille"])
+            for k in self.entreprises:
+                for i in donnees["entreprises"]:
+                    k.mod_nom(donnees[i])
+                    k.mod_valeur(donnees["entreprises"][i]["valeurs"][1])
+                    for j in range(len(donnees["entreprises"][i]["valeurs"])-1):
+                        k.mettre_a_jour_historique(donnees["entreprises"][i]["valeurs"][j])
+            config = donnees["parametres"]
+            print(f"✅ Partie '{nom}' chargée avec succès.")
+            self.mettre_a_jour_affichage()
+        else:
+            print(f"❌ Sauvegarde '{nom}' introuvable.")
+    
+    def mettre_a_jour_graphique(self):
+        # Met à jour la variation des entreprises
+        for e in self.entreprises:
+            pourcentage = generer_pourcentage_augmentation(e.get_valeur(), e.get_variation())
+            valeur, variation = application_variation(e.get_valeur(), pourcentage)
+            e.update(valeur, variation)
+
+        # Met à jour les courbes existantes
+        for e in self.entreprises:
+            ligne = self.lines[e.get_nom()]
+            histo = e.get_historique()
+            jours = list(range(histo["debut"], histo["debut"] + len(histo["valeurs"])))
+            valeurs = histo["valeurs"]
+            ligne.set_xdata(jours)
+            ligne.set_ydata(valeurs)
+
+
+        # Ajuste les limites du graphique
+        self.a.relim()
+        self.a.autoscale_view()
+
+        # Redessine le graphique
+        self.canvas.draw()
+
+        # --- Mettre à jour les infos affichées ---
+        for e in self.entreprises:
+            valeur = e.get_valeur()
+            variation = e.get_variation()
+            self.entreprise_labels[e.get_nom()].config(
+                text=f"{e.get_nom()} : {valeur:.2f} € ({variation:+.2f}%)"
+            )
+
+        # Appelle cette fonction toutes les 1000 ms (1 seconde)
+        self.after(1, self.mettre_a_jour_graphique)
+
+
 
 class PageTwo(tk.Frame):
-    def __init__(self, parent, controller, entreprises):
+    def __init__(self, parent, controller, entreprises, portefeuille):
+        self.entreprises = entreprises
         tk.Frame.__init__(self, parent)
         
         label = tk.Label(self, text="Paramètres", font=("Helvetica", 20, "bold"))
@@ -202,7 +290,8 @@ class PageTwo(tk.Frame):
 
 
 class PageThree(tk.Frame):
-    def __init__(self, parent, controller, entreprises):
+    def __init__(self, parent, controller, entreprises, portefeuille):
+        self.portefeuille = portefeuille
         tk.Frame.__init__(self, parent)
         self.entreprises = entreprises
         
@@ -233,10 +322,14 @@ class PageThree(tk.Frame):
         self.a.clear()  # Efface pour redessiner proprement
         self.lines = {}
         for e in entreprises:
+            histo = e.get_historique()
+            jours = list(range(histo["debut"], histo["debut"] + len(histo["valeurs"])))
+            valeurs = histo["valeurs"]
             couleur = config["couleurs"].get(e.get_nom(), None)
             style = '-' if config["style_courbe"] == "ligne" else 'o'
-            self.a.plot(e.get_historique(), style, label=e.get_nom(), color=couleur)
-            self.lines[e.get_nom()] = self.a.lines[-1]
+            line, = self.a.plot(jours, valeurs, style, label=e.get_nom(), color=couleur)
+            self.lines[e.get_nom()] = line
+
 
         self.a.set_title("Évolution des prix des actions")
         self.a.set_xlabel("Temps")
@@ -252,9 +345,6 @@ class PageThree(tk.Frame):
         self.a.grid(True)
 
         self.canvas = FigureCanvasTkAgg(self.f, graph_frame)
-
-        # Création du portefeuille
-        self.portefeuille = Portefeuille()
 
         self.label_portefeuille = tk.Label(self.info_frame, text=self.portefeuille.get_resume(), font=("Helvetica", 10), justify="left")
         self.label_portefeuille.pack(pady=10)
@@ -287,10 +377,14 @@ class PageThree(tk.Frame):
 
         toolbar = NavigationToolbar(self.canvas, graph_frame)
         toolbar.update()
-        self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)            
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         self.mettre_a_jour_graphique()
-    
+
+        bouton_tour = ttk.Button(self.info_frame, text="➡️ Tour suivant", command=self.avancer_tour)
+        bouton_tour.pack(pady=10)
+
+
     def acheter_action(self, entreprise):
         if self.portefeuille.acheter(entreprise, 1):
             self.update_portefeuille()
@@ -317,9 +411,12 @@ class PageThree(tk.Frame):
         # Met à jour les courbes existantes
         for e in self.entreprises:
             ligne = self.lines[e.get_nom()]
-            historique = e.get_historique()
-            ligne.set_ydata(historique)
-            ligne.set_xdata(range(len(historique)))
+            histo = e.get_historique()
+            jours = list(range(histo["debut"], histo["debut"] + len(histo["valeurs"])))
+            valeurs = histo["valeurs"]
+            ligne.set_xdata(jours)
+            ligne.set_ydata(valeurs)
+
 
         # Ajuste les limites du graphique
         self.a.relim()
@@ -338,3 +435,16 @@ class PageThree(tk.Frame):
 
         # Appelle cette fonction toutes les 1000 ms (1 seconde)
         self.after(1, self.mettre_a_jour_graphique)
+
+    def avancer_tour(self):
+        for entreprise in self.entreprises:
+            application_variation(entreprise)
+        self.mettre_a_jour_graphique()
+        self.mettre_a_jour_affichage()
+
+    def mettre_a_jour_affichage(self):
+        self.label_portefeuille.config(text=self.portefeuille.get_resume())
+
+        for e in self.entreprises:
+            valeur_actuelle = e.get_dernier_prix()
+            self.entreprise_labels[e.get_nom()].config(text=f"Prix actuel : {valeur_actuelle:.2f} €")
