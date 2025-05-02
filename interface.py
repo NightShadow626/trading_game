@@ -6,14 +6,12 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk as Navigation
 from matplotlib.figure import Figure
 import tkinter as tk
 from tkinter import ttk
-import json
 import os
-from datetime import datetime
 
 
 from courbes import generer_pourcentage_augmentation, application_variation
-from utils import Entreprise, generer_liste_entreprises, Portefeuille
-from sauvegardes import sauvegarder_partie, charger_partie, lister_sauvegardes
+from utils import Entreprise, Portefeuille
+from sauvegardes import sauvegarder_partie, charger_partie
 
 
 LARGE_FONT = ("Verdana", 12)
@@ -39,7 +37,7 @@ class Ecran(tk.Tk):
             entreprises = []  # Liste d'entreprises par défaut si aucune n'est fournie
         tk.Tk.__init__(self, *args, **kwargs)
 
- #       tk.Tk.iconbitmap(self, default="clienticon.ico")  # Remplacer ou enlever si nécessaire
+        tk.Tk.iconbitmap(self, default="icon.ico")  # Remplacer ou enlever si nécessaire
         tk.Tk.wm_title(self, "jeu de bourse")
 
         container = tk.Frame(self)
@@ -49,12 +47,16 @@ class Ecran(tk.Tk):
 
         self.frames = {}
 
-        for F in (StartPage, PageOne, PageTwo, PageThree):
-            if F == PageThree or F == PageTwo or F == PageOne:
+        for F in (StartPage, PageTwo, PageThree, PageOne):
+            if F == PageThree or F == PageTwo:
                 frame = F(container, self, entreprises, portefeuille)
+            elif F == PageOne:
+                frame = F(container, self, entreprises, portefeuille, self.frames)
             else:
                 frame = F(container, self)
             self.frames[F] = frame
+            print(self.frames)
+            print(container)
             frame.grid(row=0, column=0, sticky="nsew")
         
         style = ttk.Style()
@@ -118,12 +120,16 @@ class StartPage(tk.Frame):
 
 
 class PageOne(tk.Frame):
-    def __init__(self, parent, controller, entreprises, portefeuille):
+    def __init__(self, parent, controller, entreprises, portefeuille, frames):
         self.entreprises = entreprises
         self.portefeuille = portefeuille
+        self.frames = frames
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
+        self.controller = controller
+        print("controller", controller)
+        print("self.controller", self.controller)
 
         button1 = ttk.Button(self, text="Back to Home",
                              command=lambda: controller.show_frame(StartPage),
@@ -147,7 +153,7 @@ class PageOne(tk.Frame):
             "portefeuille": self.portefeuille.get_actions()
         }
         print(self.entreprises)
-        for i in range(len(self.entreprises) - 1):
+        for i in range(len(self.entreprises)):
             dico_entreprises[self.entreprises[i].get_nom()] = self.entreprises[i].get_historique()
         parametres = config
 
@@ -156,57 +162,37 @@ class PageOne(tk.Frame):
 
 
     def charger_partie_utilisateur(self, nom):
-        global config
         donnees = charger_partie(nom)
-        if donnees:
-            self.portefeuille.modifier_argent(donnees["joueur"]["argent"])
-            self.portefeuille.modifier_actions(donnees["joueur"]["portefeuille"])
-            for k in self.entreprises:
-                for i in donnees["entreprises"]:
-                    k.mod_nom(donnees[i])
-                    k.mod_valeur(donnees["entreprises"][i]["valeurs"][1])
-                    for j in range(len(donnees["entreprises"][i]["valeurs"])-1):
-                        k.mettre_a_jour_historique(donnees["entreprises"][i]["valeurs"][j])
-            config = donnees["parametres"]
-            print(f"✅ Partie '{nom}' chargée avec succès.")
-            self.mettre_a_jour_affichage()
-        else:
+        if not donnees:
             print(f"❌ Sauvegarde '{nom}' introuvable.")
-    
-    def mettre_a_jour_graphique(self):
-        # Met à jour la variation des entreprises
-        for e in self.entreprises:
-            pourcentage = generer_pourcentage_augmentation(e.get_valeur(), e.get_variation())
-            valeur, variation = application_variation(e.get_valeur(), pourcentage)
-            e.update(valeur, variation)
+            return
 
-        # Met à jour les courbes existantes
-        for e in self.entreprises:
-            ligne = self.lines[e.get_nom()]
-            histo = e.get_historique()
-            jours = list(range(histo["debut"], histo["debut"] + len(histo["valeurs"])))
-            valeurs = histo["valeurs"]
-            ligne.set_xdata(jours)
-            ligne.set_ydata(valeurs)
+        # 1) Met à jour tes objets métier
+        self.portefeuille.modifier_argent(donnees["joueur"]["argent"])
+        self.portefeuille.modifier_actions(donnees["joueur"]["portefeuille"])
 
+        # Reconstruis tes entreprises à partir du format sauvegardé
+        nouvelles = []
+        for nom_e, histo in donnees["entreprises"].items():
+            e = Entreprise(nom_e, histo["valeurs"][-1])
+            # on remplit le nouvel historique dict {debut, valeurs}
+            e.historique = { "debut": histo["debut"], "valeurs": histo["valeurs"][:] }
+            nouvelles.append(e)
+        self.entreprises[:] = nouvelles  # remplace la liste en place
 
-        # Ajuste les limites du graphique
-        self.a.relim()
-        self.a.autoscale_view()
+        # 2) Mets à jour ta config
+        global config
+        config = donnees["parametres"]
 
-        # Redessine le graphique
-        self.canvas.draw()
+        # 3) Fais recharger la PageThree
+        page3 = self.controller.frames[PageThree]
+        page3.load_data(self.entreprises, self.portefeuille)
 
-        # --- Mettre à jour les infos affichées ---
-        for e in self.entreprises:
-            valeur = e.get_valeur()
-            variation = e.get_variation()
-            self.entreprise_labels[e.get_nom()].config(
-                text=f"{e.get_nom()} : {valeur:.2f} € ({variation:+.2f}%)"
-            )
+        # 4) Enfin, affiche la page 3
+        self.controller.show_frame(PageThree)
+        print(f"✅ Partie '{nom}' chargée avec succès.")
 
-        # Appelle cette fonction toutes les 1000 ms (1 seconde)
-        self.after(1, self.mettre_a_jour_graphique)
+        
 
 
 
@@ -275,6 +261,7 @@ class PageTwo(tk.Frame):
             self.bouton_theme.config(text="Activer Thème Sombre")
             self.master.configure(bg="white")
             self.configure(bg="white")
+            self.controller.appliquer_theme()
 
     def valider_style(self):
         config["style_courbe"] = self.style_var.get()
@@ -381,9 +368,6 @@ class PageThree(tk.Frame):
 
         self.mettre_a_jour_graphique()
 
-        bouton_tour = ttk.Button(self.info_frame, text="➡️ Tour suivant", command=self.avancer_tour)
-        bouton_tour.pack(pady=10)
-
 
     def acheter_action(self, entreprise):
         if self.portefeuille.acheter(entreprise, 1):
@@ -434,17 +418,22 @@ class PageThree(tk.Frame):
             )
 
         # Appelle cette fonction toutes les 1000 ms (1 seconde)
-        self.after(1, self.mettre_a_jour_graphique)
+        self.after(1000, self.mettre_a_jour_graphique)
 
-    def avancer_tour(self):
-        for entreprise in self.entreprises:
-            application_variation(entreprise)
+    def load_data(self, entreprises, portefeuille):
+        """
+        Met à jour les données de la page (entreprises + portefeuille)
+        et rafraîchit l’affichage (graphique + labels).
+        """
+        self.entreprises = entreprises
+        self.portefeuille = portefeuille
+
+        # Mettre à jour le graphique et l’affichage de droite
         self.mettre_a_jour_graphique()
-        self.mettre_a_jour_affichage()
-
-    def mettre_a_jour_affichage(self):
-        self.label_portefeuille.config(text=self.portefeuille.get_resume())
-
+        self.update_portefeuille()
         for e in self.entreprises:
-            valeur_actuelle = e.get_dernier_prix()
-            self.entreprise_labels[e.get_nom()].config(text=f"Prix actuel : {valeur_actuelle:.2f} €")
+            # Si tu as un label dédié pour chaque entreprise, 
+            # mets-le à jour ici aussi
+            self.entreprise_labels[e.get_nom()].config(
+                text=f"{e.get_nom()} : {e.get_valeur():.2f} € ({e.get_variation():+.2f}%)"
+            )

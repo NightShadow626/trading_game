@@ -62,7 +62,7 @@ def generer_liste_entreprises(noms):
 
 
 class Portefeuille:
-    def __init__(self, argent_initial=10000):
+    def __init__(self, argent_initial=100):
         self.argent = argent_initial
         self.actions = {}  # nom_entreprise -> nombre d'actions possédées
 
