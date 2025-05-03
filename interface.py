@@ -6,12 +6,15 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk as Navigation
 from matplotlib.figure import Figure
 import tkinter as tk
 from tkinter import ttk
+from tkinter import *
 import os
+import pygame
 
 
 from courbes import generer_pourcentage_augmentation, application_variation
 from utils import Entreprise, Portefeuille
-from sauvegardes import sauvegarder_partie, charger_partie
+from sauvegardes import sauvegarder_partie, charger_partie, supprimer_sauvegarde, lister_sauvegardes
+from musique import jouer_musiques
 
 
 LARGE_FONT = ("Verdana", 12)
@@ -65,7 +68,6 @@ class Ecran(tk.Tk):
                         relief="flat",
                         background="#3498db",
                         foreground="Black",
-                        borderwidth=0,
                         bordercolor="#2980b9",
                         highlightthickness=0,
                         highlightbackground="#2980b9",
@@ -80,6 +82,7 @@ class Ecran(tk.Tk):
 
         self.show_frame(StartPage)
 
+
     def show_frame(self, cont):
         frame = self.frames[cont]
         frame.tkraise()
@@ -93,6 +96,9 @@ class Ecran(tk.Tk):
                     widget.configure(bg=couleur_fond, fg="white" if config["theme"] == "sombre" else "black")
                 except:
                     pass  # certains widgets n'ont pas bg/fg
+
+
+
 
 
 class StartPage(tk.Frame):
@@ -119,6 +125,7 @@ class StartPage(tk.Frame):
 
 class PageOne(tk.Frame):
     def __init__(self, parent, controller, entreprises, portefeuille, frames):
+        global config
         self.entreprises = entreprises
         self.portefeuille = portefeuille
         self.frames = frames
@@ -137,9 +144,29 @@ class PageOne(tk.Frame):
                              style="TButton")
         button2.pack()
 
-        tk.Button(self, text="💾 Sauvegarder", command=lambda: self.sauvegarder_partie_utilisateur("ma_sauvegarde")).pack()
-        tk.Button(self, text="📂 Charger", command=lambda: self.charger_partie_utilisateur("ma_sauvegarde")).pack()
-        global config
+        button3 = tk.Button(self, text="💾 Sauvegarder", width='18', borderwidth=2,  background="gray",relief=RAISED,command=lambda: self.popup_sauvegarde())
+        button3.pack(pady=10, padx=10)
+
+        menuCharger = Menubutton(self, text='📂 Charger', width='20', borderwidth=2, bg='gray', activebackground='darkorange',relief = RAISED)
+        # Création d'un menu défilant
+        menuDeroulant1 = Menu(menuCharger)
+        for nom in lister_sauvegardes():
+            menuDeroulant1.add_command(label=nom, command=lambda nom=nom: self.charger_partie_utilisateur(nom))
+
+        # Attribution du menu déroulant au menu Affichage
+        menuCharger.configure(menu=menuDeroulant1)
+        menuCharger.pack(pady=10, padx=10)
+
+        menuSupprimer = Menubutton(self, text='🗑️ Supprimer', width='20', borderwidth=2, bg='gray', activebackground='darkred', activeforeground='white', relief=RAISED)
+        # Création d'un menu défilant
+        menuDeroulant2 = Menu(menuSupprimer)
+        for nom in lister_sauvegardes():
+            menuDeroulant2.add_command(label=nom, command=lambda nom=nom: supprimer_sauvegarde(nom))
+
+        # Attribution du menu déroulant au menu Affichage
+        menuSupprimer.configure(menu=menuDeroulant2)
+        menuSupprimer.pack(pady=10, padx=10)
+        
 
     def sauvegarder_partie_utilisateur(self, nom):
         global config
@@ -186,6 +213,29 @@ class PageOne(tk.Frame):
         # 4) Enfin, affiche la page 3
         self.controller.show_frame(PageThree)
         print(f"✅ Partie '{nom}' chargée avec succès.")
+    
+    def popup_sauvegarde(self):
+        def nomination():
+            nom = my_entry.get()
+            if nom:
+                self.sauvegarder_partie_utilisateur(nom)
+                popup.destroy()
+            else:
+                label.config(text="Nom de sauvegarde invalide !", fg="red")
+            popup.destroy
+        # Crée une fenêtre popup pour la sauvegarde
+        popup = tk.Toplevel(self)
+        popup.title("Sauvegarde")
+        label = tk.Label(popup)
+        label.pack(pady=0, padx=0)
+        my_entry = Entry(popup)
+        my_entry.pack()
+        button1 = ttk.Button(popup, text="Annuler", command=popup.destroy)
+        button1.pack(pady=5)
+        button2 = ttk.Button(popup, text="Sauvegarder", command=nomination)
+        button2.pack(pady=5)
+        popup.transient(self)  # Set the popup as a transient window of the main window
+    
 
         
 
@@ -200,44 +250,35 @@ class PageTwo(tk.Frame):
         label.pack(pady=10)
 
         # Bouton thème sombre
-        self.bouton_theme = ttk.Button(self, text="Activer Thème Sombre", command=self.basculer_theme)
-        self.bouton_theme.pack(pady=5)
+        self.bouton_theme = tk.Button(self, text="Activer Thème Sombre" , width='18', borderwidth=2,  background="gray",relief=RAISED, command=self.basculer_theme)
+        self.bouton_theme.pack(pady=30)
 
-        # Sélection du style de courbe
-        label_style = tk.Label(self, text="Style de Courbe :", font=("Helvetica", 12))
-        label_style.pack(pady=5)
+        menuMusique = Menubutton(self, text='🎵 Muse ique', width='20', borderwidth=2, bg='gray', activebackground='darkred', activeforeground='white', relief=RAISED)
+        # Création d'un menu défilant
+        menuDeroulant = Menu(menuMusique)
+        musique_dossier = r'Muse'
+        musique_fichiers = [os.path.join(musique_dossier, f) for f in os.listdir(musique_dossier) if f.endswith('.mp3')]
+        for nom in musique_fichiers:
+            menuDeroulant.add_command(label=nom, command=lambda nom=nom:jouer_musiques(nom))
 
-        self.style_var = tk.StringVar(value=config["style_courbe"])
-        style_frame = tk.Frame(self)
-        style_frame.pack()
+        # Attribution du menu déroulant au menu Affichage
+        menuMusique.configure(menu=menuDeroulant)
+        menuMusique.pack(pady=10, padx=10)
 
-        radio_ligne = tk.Radiobutton(style_frame, text="Ligne continue", variable=self.style_var, value="ligne")
-        radio_points = tk.Radiobutton(style_frame, text="Points", variable=self.style_var, value="points")
-        radio_ligne.pack(side=tk.LEFT, padx=10)
-        radio_points.pack(side=tk.LEFT, padx=10)
+        bouton_arreter_musique = tk.Button(self, text="⏸️ Pause", width='18', borderwidth=2, background="gray", relief=RAISED, command=lambda: pygame.mixer.music.pause())
+        bouton_arreter_musique.pack(pady=5)
+        bouton_continuer_musique = tk.Button(self, text="▶️ Reprendre", width='18', borderwidth=2, background="gray", relief=RAISED, command=lambda: pygame.mixer.music.unpause())
+        bouton_continuer_musique.pack(pady=5)
 
-        bouton_valider_style = ttk.Button(self, text="Valider Style", command=self.valider_style)
-        bouton_valider_style.pack(pady=5)
+        # Gestion du volume
+        label_volume = tk.Label(self, text="Volume :", font=("Helvetica", 12))
+        label_volume.pack(pady=5)
 
-        # Choix des couleurs pour chaque entreprise
-        label_couleurs = tk.Label(self, text="Couleur des Entreprises :", font=("Helvetica", 12))
-        label_couleurs.pack(pady=5)
+        self.volume_var = tk.DoubleVar(value=0.5)  # Valeur initiale du volume (50%)
+        scale_volume = tk.Scale(self, from_=0, to=1, resolution=0.01, orient="horizontal",
+                    variable=self.volume_var, command=self.ajuster_volume)
+        scale_volume.pack(pady=5)
 
-        self.couleur_vars = {}
-        for e in entreprises:
-            frame = tk.Frame(self)
-            frame.pack(pady=2)
-            label = tk.Label(frame, text=e.get_nom())
-            label.pack(side=tk.LEFT)
-
-            couleur_var = tk.StringVar(value=config["couleurs"].get(e.get_nom(), "#000000"))
-            self.couleur_vars[e.get_nom()] = couleur_var
-
-            entry = tk.Entry(frame, textvariable=couleur_var, width=10)
-            entry.pack(side=tk.LEFT, padx=5)
-
-        bouton_valider_couleurs = ttk.Button(self, text="Valider Couleurs", command=self.valider_couleurs)
-        bouton_valider_couleurs.pack(pady=10)
 
         # Boutons de navigation
         bouton_retour = ttk.Button(self, text="Retour Accueil",
@@ -266,6 +307,9 @@ class PageTwo(tk.Frame):
         for nom, var in self.couleur_vars.items():
             config["couleurs"][nom] = var.get()
         print("Couleurs choisies :", config["couleurs"])
+
+    def ajuster_volume(self, volume):
+        pygame.mixer.music.set_volume(float(volume))
 
 
 

@@ -1,7 +1,4 @@
-commence avec 10$
-plusieurs entreprises (plus ou moins grande avec des prix d'action differentes)
-regarder pour avoir des courbes reel (tendance / pattern)  (500 actions max)
-generation à voir pour que ça ne soit pas trop rapide ni trop lent : soit une genration toute les 30s ou autres ou avoir un/des bouton(s) pour passer de jour/mois/anne (il peux y avoir les deux)
+
 plusieurs style de courbe (plusieurs couleurs / style graph)
 pouvoir changer l'arriere plan
 generer les noms d'entreprises avec chatgpt
