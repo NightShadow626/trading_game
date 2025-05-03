@@ -37,7 +37,7 @@ class Ecran(tk.Tk):
             entreprises = []  # Liste d'entreprises par défaut si aucune n'est fournie
         tk.Tk.__init__(self, *args, **kwargs)
 
-#        tk.Tk.iconbitmap(self, default="icon.ico")  # Remplacer ou enlever si nécessaire
+        tk.Tk.iconbitmap(self, default="icon.ico")  # Remplacer ou enlever si nécessaire
         tk.Tk.wm_title(self, "jeu de bourse")
 
         container = tk.Frame(self)
@@ -55,8 +55,6 @@ class Ecran(tk.Tk):
             else:
                 frame = F(container, self)
             self.frames[F] = frame
-            print(self.frames)
-            print(container)
             frame.grid(row=0, column=0, sticky="nsew")
         
         style = ttk.Style()
@@ -128,8 +126,6 @@ class PageOne(tk.Frame):
         label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
         self.controller = controller
-        print("controller", controller)
-        print("self.controller", self.controller)
 
         button1 = ttk.Button(self, text="Back to Home",
                              command=lambda: controller.show_frame(StartPage),
@@ -152,7 +148,6 @@ class PageOne(tk.Frame):
             "argent": self.portefeuille.get_argent(),
             "portefeuille": self.portefeuille.get_actions()
         }
-        print(self.entreprises)
         for i in range(len(self.entreprises)):
             dico_entreprises[self.entreprises[i].get_nom()] = self.entreprises[i].get_historique()
         parametres = config
@@ -266,13 +261,11 @@ class PageTwo(tk.Frame):
     def valider_style(self):
         config["style_courbe"] = self.style_var.get()
         print("Style de courbe sélectionné :", config["style_courbe"])
-        print(config)
 
     def valider_couleurs(self):
         for nom, var in self.couleur_vars.items():
             config["couleurs"][nom] = var.get()
         print("Couleurs choisies :", config["couleurs"])
-        print(config)
 
 
 

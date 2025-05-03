@@ -1,2 +1,2 @@
 affichage matplotlib avec tkinter
-Les courbes changeaient de couleur → corrigé en mettant à jour les lignes existantes sans en recréer.
+probleme sur le chargement de sauvegarde avec un probleme d'affichage du graphique
