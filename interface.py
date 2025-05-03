@@ -37,7 +37,7 @@ class Ecran(tk.Tk):
             entreprises = []  # Liste d'entreprises par défaut si aucune n'est fournie
         tk.Tk.__init__(self, *args, **kwargs)
 
-        tk.Tk.iconbitmap(self, default="icon.ico")  # Remplacer ou enlever si nécessaire
+#        tk.Tk.iconbitmap(self, default="icon.ico")  # Remplacer ou enlever si nécessaire
         tk.Tk.wm_title(self, "jeu de bourse")
 
         container = tk.Frame(self)
@@ -386,6 +386,10 @@ class PageThree(tk.Frame):
 
 
     def mettre_a_jour_graphique(self):
+        # Pour éviter d'empiler les appels
+        if hasattr(self, "_after_id"):
+            self.after_cancel(self._after_id)
+
         # Met à jour la variation des entreprises
         for e in self.entreprises:
             pourcentage = generer_pourcentage_augmentation(e.get_valeur(), e.get_variation())
@@ -421,19 +425,63 @@ class PageThree(tk.Frame):
         self.after(1000, self.mettre_a_jour_graphique)
 
     def load_data(self, entreprises, portefeuille):
-        """
-        Met à jour les données de la page (entreprises + portefeuille)
-        et rafraîchit l’affichage (graphique + labels).
-        """
+        # Stoppe les mises à jour précédentes
+        self.after_cancel(self._after_id) if hasattr(self, "_after_id") else None
+
+        # Nettoyer le graphique et l'affichage
+        self.a.clear()
+        self.canvas.draw()
+
+        # Après avoir tout supprimé
+        for widget in self.info_frame.winfo_children():
+            widget.destroy()
+
+        # <-- Ajoute ceci pour recréer le label de l'argent
+        self.label_portefeuille = tk.Label(self.info_frame, text=self.portefeuille.get_resume(), font=("Helvetica", 10), justify="left")
+        self.label_portefeuille.pack(pady=10)
+
+
+        # Réinitialise les données internes
         self.entreprises = entreprises
         self.portefeuille = portefeuille
+        self.lines = {}
+        self.entreprise_labels = {}
+        self.boutons_entreprises = {}
 
-        # Mettre à jour le graphique et l’affichage de droite
-        self.mettre_a_jour_graphique()
-        self.update_portefeuille()
-        for e in self.entreprises:
-            # Si tu as un label dédié pour chaque entreprise, 
-            # mets-le à jour ici aussi
-            self.entreprise_labels[e.get_nom()].config(
-                text=f"{e.get_nom()} : {e.get_valeur():.2f} € ({e.get_variation():+.2f}%)"
-            )
+        # Reconstruire le graphique et les éléments visuels
+        for e in entreprises:
+            histo = e.get_historique()
+            jours = list(range(histo["debut"], histo["debut"] + len(histo["valeurs"])))
+            valeurs = histo["valeurs"]
+            couleur = config["couleurs"].get(e.get_nom(), None)
+            style = '-' if config["style_courbe"] == "ligne" else 'o'
+            line, = self.a.plot(jours, valeurs, style, label=e.get_nom(), color=couleur)
+            self.lines[e.get_nom()] = line
+
+            cadre = tk.Frame(self.info_frame)
+            cadre.pack(pady=5)
+            label = tk.Label(cadre, text=e.get_nom(), font=("Helvetica", 12))
+            label.pack(side=tk.LEFT)
+
+            lbl = tk.Label(self.info_frame, text="", font=("Helvetica", 12), anchor="w", bg="white")
+            lbl.pack(fill="x", pady=2)
+            self.entreprise_labels[e.get_nom()] = lbl
+
+            bouton_acheter = ttk.Button(cadre, text="Acheter", command=lambda e=e: self.acheter_action(e))
+            bouton_acheter.pack(side=tk.LEFT, padx=2)
+
+            bouton_vendre = ttk.Button(cadre, text="Vendre", command=lambda e=e: self.vendre_action(e))
+            bouton_vendre.pack(side=tk.LEFT, padx=2)
+
+            self.boutons_entreprises[e.get_nom()] = (bouton_acheter, bouton_vendre)
+
+        self.a.set_title("Évolution des prix des actions")
+        self.a.set_xlabel("Temps")
+        self.a.set_ylabel("Prix (€)")
+        self.a.legend()
+        self.a.grid(True)
+
+        self.canvas.draw()
+
+        # Redémarre les mises à jour
+        self._after_id = self.after(1000, self.mettre_a_jour_graphique)
