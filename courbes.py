@@ -44,15 +44,7 @@ def generer_pourcentage_augmentation(valeur : float, dernier_pourcentage : float
 
     return round(variation, 2)
 
-def application_variation(valeur, variation):
+def application_variation(valeur : float, variation : float) -> tuple:
+    """Applique la variation à une valeur donnée."""
     nouvelle_valeur = round(valeur * (1 + variation / 100),2)
     return (nouvelle_valeur, variation)
-
-
-#script test des deux fonction generer et apllication
-#valeur = 7.5
-#dernier = 1.2
-#for i in range(20):
-#    pourcentage = generer_pourcentage_augmentation(valeur, dernier)
-#    valeur, dernier = application_variation(valeur, pourcentage)
-#    print(valeur, pourcentage)

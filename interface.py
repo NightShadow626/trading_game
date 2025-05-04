@@ -1,4 +1,5 @@
-#Interface graphique (Tkinter)
+# -*- coding: utf-8 -*-
+# Importation des modules nécessaires
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -10,13 +11,12 @@ from tkinter import *
 import os
 import pygame
 
-
 from courbes import generer_pourcentage_augmentation, application_variation
 from utils import Entreprise, Portefeuille
 from sauvegardes import sauvegarder_partie, charger_partie, supprimer_sauvegarde, lister_sauvegardes
 from musique import jouer_musiques
 
-
+# conctantes
 LARGE_FONT = ("Verdana", 12)
 
 # Variables globales de configuration
@@ -35,7 +35,9 @@ portefeuille = Portefeuille()
 
 # Création de la classe ecran pour l'interface utilisateur
 class Ecran(tk.Tk):
-    def __init__(self, entreprises=None, *args, **kwargs):
+    """Classe principale de l'interface utilisateur."""
+    def __init__(self, entreprises : list =None, *args, **kwargs) -> None:
+        """Initialise l'interface utilisateur avec les entreprises et le portefeuille."""
         if entreprises is None:
             entreprises = []  # Liste d'entreprises par défaut si aucune n'est fournie
         tk.Tk.__init__(self, *args, **kwargs)
@@ -83,11 +85,13 @@ class Ecran(tk.Tk):
         self.show_frame(StartPage)
 
 
-    def show_frame(self, cont):
+    def show_frame(self, cont : str) -> None:
+        """Affiche le cadre de la page spécifiée."""
         frame = self.frames[cont]
         frame.tkraise()
     
-    def appliquer_theme(self):
+    def appliquer_theme(self) -> None:
+        """Applique le thème sombre ou clair à l'interface."""
         couleur_fond = "black" if config["theme"] == "sombre" else "white"
         for frame in self.frames.values():
             frame.configure(bg=couleur_fond)
@@ -102,7 +106,9 @@ class Ecran(tk.Tk):
 
 
 class StartPage(tk.Frame):
-    def __init__(self, parent, controller):
+    """Page d'accueil de l'interface utilisateur."""
+    def __init__(self, parent : object, controller : object = None) -> None:
+        """Initialise la page d'accueil."""
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Start Page", font=("Helvetica", 20, "bold"), fg="#2e86de")
         label.pack(pady=10, padx=10)
@@ -124,7 +130,9 @@ class StartPage(tk.Frame):
 
 
 class PageOne(tk.Frame):
-    def __init__(self, parent, controller, entreprises, portefeuille, frames):
+    """Page pour la sauvegarde et le chargement des parties."""
+    def __init__(self, parent : object, controller : object, entreprises : list, portefeuille : object, frames : dict) -> None:
+        """Initialise la page."""
         global config
         self.entreprises = entreprises
         self.portefeuille = portefeuille
@@ -168,7 +176,8 @@ class PageOne(tk.Frame):
         menuSupprimer.pack(pady=10, padx=10)
         
 
-    def sauvegarder_partie_utilisateur(self, nom):
+    def sauvegarder_partie_utilisateur(self, nom : str) -> None:
+        """Sauvegarde l'état du jeu dans un fichier JSON."""
         global config
         dico_entreprises = {}
         joueur = {
@@ -183,7 +192,8 @@ class PageOne(tk.Frame):
         print(f"✅ Partie '{nom}' sauvegardée !")
 
 
-    def charger_partie_utilisateur(self, nom):
+    def charger_partie_utilisateur(self, nom : str) -> None:
+        """Charge une partie sauvegardée à partir du fichier JSON."""
         donnees = charger_partie(nom)
         if not donnees:
             print(f"❌ Sauvegarde '{nom}' introuvable.")
@@ -202,11 +212,11 @@ class PageOne(tk.Frame):
             nouvelles.append(e)
         self.entreprises[:] = nouvelles  # remplace la liste en place
 
-        # 2) Mets à jour ta config
+        # 2) Mets la config à jour
         global config
         config = donnees["parametres"]
 
-        # 3) Fais recharger la PageThree
+        # 3) recharger la PageThree
         page3 = self.controller.frames[PageThree]
         page3.load_data(self.entreprises, self.portefeuille)
 
@@ -214,8 +224,10 @@ class PageOne(tk.Frame):
         self.controller.show_frame(PageThree)
         print(f"✅ Partie '{nom}' chargée avec succès.")
     
-    def popup_sauvegarde(self):
-        def nomination():
+    def popup_sauvegarde(self) -> None:
+        """Crée une fenêtre popup pour la sauvegarde."""
+        def nomination() -> None:
+            """Fonction pour valider le nom de la sauvegarde."""
             nom = my_entry.get()
             if nom:
                 self.sauvegarder_partie_utilisateur(nom)
@@ -242,7 +254,9 @@ class PageOne(tk.Frame):
 
 
 class PageTwo(tk.Frame):
-    def __init__(self, parent, controller, entreprises, portefeuille):
+    """Page pour les paramètres de l'interface utilisateur."""
+    def __init__(self, parent, controller, entreprises, portefeuille) -> None:
+        """Initialise la page des paramètres."""
         self.entreprises = entreprises
         tk.Frame.__init__(self, parent)
         
@@ -287,7 +301,8 @@ class PageTwo(tk.Frame):
 
         self.controller = controller
 
-    def basculer_theme(self):
+    def basculer_theme(self) -> None:
+        """Bascule entre le thème clair et sombre."""
         if config["theme"] == "clair":
             config["theme"] = "sombre"
             self.bouton_theme.config(text="Activer Thème Clair")
@@ -299,22 +314,27 @@ class PageTwo(tk.Frame):
             self.configure(bg="white")
             self.controller.appliquer_theme()
 
-    def valider_style(self):
+    def valider_style(self) -> None:
+        """Valide le style de courbe choisi."""
         config["style_courbe"] = self.style_var.get()
         print("Style de courbe sélectionné :", config["style_courbe"])
 
-    def valider_couleurs(self):
+    def valider_couleurs(self) -> None:
+        """Valide les couleurs choisies pour les entreprises."""
         for nom, var in self.couleur_vars.items():
             config["couleurs"][nom] = var.get()
         print("Couleurs choisies :", config["couleurs"])
 
-    def ajuster_volume(self, volume):
+    def ajuster_volume(self, volume : float) -> None:
+        """Ajuste le volume de la musique."""
         pygame.mixer.music.set_volume(float(volume))
 
 
 
 class PageThree(tk.Frame):
-    def __init__(self, parent, controller, entreprises, portefeuille):
+    """Page pour afficher le graphique des entreprises."""
+    def __init__(self, parent, controller, entreprises, portefeuille) -> None:
+        """Initialise la page du graphique."""
         self.portefeuille = portefeuille
         tk.Frame.__init__(self, parent)
         self.entreprises = entreprises
@@ -406,23 +426,27 @@ class PageThree(tk.Frame):
         self.mettre_a_jour_graphique()
 
 
-    def acheter_action(self, entreprise):
+    def acheter_action(self, entreprise : object) -> None:
+        """Acheter une action de l'entreprise spécifiée."""
         if self.portefeuille.acheter(entreprise, 1):
             self.update_portefeuille()
         else:
             print("Pas assez d'argent pour acheter.")
 
-    def vendre_action(self, entreprise):
+    def vendre_action(self, entreprise : object) -> None:
+        """Vendre une action de l'entreprise spécifiée."""
         if self.portefeuille.vendre(entreprise, 1):
             self.update_portefeuille()
         else:
             print("Pas assez d'actions pour vendre.")
 
-    def update_portefeuille(self):
+    def update_portefeuille(self) -> None:
+        """Met à jour l'affichage du portefeuille."""
         self.label_portefeuille.config(text=self.portefeuille.get_resume())
 
 
-    def mettre_a_jour_graphique(self):
+    def mettre_a_jour_graphique(self) -> None:
+        """Met à jour le graphique et les informations affichées."""
         # Pour éviter d'empiler les appels
         if hasattr(self, "_after_id"):
             self.after_cancel(self._after_id)
@@ -461,7 +485,8 @@ class PageThree(tk.Frame):
         # Appelle cette fonction toutes les 1000 ms (1 seconde)
         self.after(1000, self.mettre_a_jour_graphique)
 
-    def load_data(self, entreprises, portefeuille):
+    def load_data(self, entreprises : list, portefeuille : object) -> None:
+        """Charge les données des entreprises et du portefeuille dans le graphique."""
         # Stoppe les mises à jour précédentes
         self.after_cancel(self._after_id) if hasattr(self, "_after_id") else None
 
