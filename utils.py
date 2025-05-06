@@ -128,37 +128,61 @@ class Portefeuille:
         '''Modifie le dictionnaire des actions possédées dans le portefeuille.'''
         self.actions = actions
 
-# Lists to generate silly info messages
-subjects = [
-    "Le hamster du trader", "Une licorne", "Un pigeon", "Le café de la machine",
-    "Le stagiaire", "La photocopieuse", "L’imprimante", "Le robot aspirateur",
-    "La plante verte", "Le PDG", "Le chat", "Le chien", "Le poisson rouge",
-    "La souris", "Le cochon d'Inde", "Le lama", "Le kangourou", "Le panda",
-    "Le serpent", "Le robot", "Le fantôme", "Le squelette", "Le ninja",
-    "Le pirate", "Le dragon", "Le robot-cuiseur", "La télécommande", "La télé",
-    "Le grille-pain", "Le vélo"
+infos_inutiles = [
+    "Le PDG de Financo a été aperçu en train de danser sur son bureau.",
+    "Les pigeons de la place boursière prévoient un crash imminent.",
+    "CryptoPotato annonce une nouvelle blockchain... pour les patates.",
+    "FoodiCorp aurait racheté un fast-food pour l'expérience immersive.",
+    "TechNova offre désormais des toasters connectés avec abonnement mensuel.",
+    "Une taupe a été vue quittant les locaux de GameStart Inc.",
+    "Le stagiaire de BioCorp aurait cliqué sur 'Vendre tout' par erreur.",
+    "Le directeur de CleanPower roule en diesel. Chut.",
+    "Un bug a fait monter la valeur de NullCompany à ∞€.",
+    "Le conseil d’administration s’est perdu en salle de réunion.",
+    "On a retrouvé un canard malin investissant dans les ETF.",
+    "La machine à café de WallStreetCo refuse de servir avant 9h.",
+    "La photocopieuse de TechSoft imprime uniquement des memes.",
+    "Un chaton travaille désormais comme analyste financier junior.",
+    "Les sandwichs de la cafétéria sont cotés en bourse.",
+    "Le cloud de DataSky gonfle plus vite qu’un ballon de baudruche.",
+    "Le bureau 42 est officiellement classé zone à haut risque de crash.",
+    "On dit que l’imprimante de DevCorp émet des signaux de trading.",
+    "Un ninja invisible a fait fondre le compte test de TradeSense.",
+    "Le scooter flambant neuf du CEO est taxé comme un actif crypto.",
+    "Les plantes vertes de FinTechHouse génèrent 0,05% de rendement.",
+    "Une légende parle d’un glitch qui racheta toutes les actions Meta.",
+    "Le grille-pain de SmartHomeCo brûle les toasts sur un trend ascendant.",
+    "Les tableaux blancs de StrategyCorp s’auto-inscrivent en IPO.",
+    "Le poney secret du département R&D fait grimper les valorisations.",
+    "La porte du local data reste coincée sur un signal haussier.",
+    "Un drone livre désormais les dividendes directement à domicile.",
+    "La fax antique de RetroTrade envoie des ordres à 300 baud.",
+    "On soupçonne un parc JurassicParkTokens de miner du Bitcoin.",
+    "Le hamster du CEO s’est échappé avec des plans de diversification.",
+    "Les tickets de métro chez CityTransit Inc. affichent le Cours du jour.",
+    "On a découvert un trésor de pièces de monnaie dans l’armoire du bureau.",
+    "Le distributeur de snacks déclenche des alertes de volatilité.",
+    "Le chat de l’administrateur système a accès à tous les wallets.",
+    "Les murs de la salle de réunion sont recouverts de graphiques TikZ.",
+    "L’horloge du trading tourne à l’heure du Lapin Blanc d’Alice.",
+    "Un ours en peluche porte un costume d’analyste financier senior.",
+    "Le code de la dernière mise à jour est écrit en hiéroglyphes.",
+    "Le stagiaire relit les contrats en format Comic Sans.",
+    "La photocopieuse recrache des billets de Monopoly à chaque copie.",
+    "Le distributeur d’eau propose maintenant des jetons NFT.",
+    "Un chat holographique fait office de speaker dans les conférences.",
+    "Le serveur principal tourne désormais sous Windows 95, par nostalgie.",
+    "La RSI de CupcakeCorp est mesurée en parts de gâteau.",
+    "Le drone de surveillance joue du ukulélé quand il patrouille.",
+    "Un troll légendaire commente chaque transaction via Slack.",
+    "Le toboggan du bureau est désormais la route d’évacuation d’urgence.",
+    "Les employés reçoivent des actions en formules de blagues.",
+    "Le distributeur de cafés prépare désormais des CappuInvestments.",
 ]
-
-verbs = [
-    "a piraté", "a dansé sur", "a dévoré", "a glissé sur", "a tweeté",
-    "a enchanté", "a hypnotisé", "a imprimé", "a téléporté", "a lancé",
-    "a vendu", "a acheté", "a peint", "a transformé", "a cassé",
-    "a réparé", "a chanté", "a sifflé", "a nagé dans", "a cuisiné",
-    "a exploré", "a ignoré", "a embrassé", "a endormi", "a réveillé",
-    "a effrayé", "a construit", "a déchaîné", "a fait pousser", "a planté"
-]
-
-objects = [
-    "un sandwich", "le Nasdaq", "une machine à café", "une licorne en peluche",
-    "une boule de cristal", "un fromage volant", "un nuage", "la blockchain",
-    "un sel de bain", "une chaussette", "le code source", "une banane",
-    "un arc-en-ciel", "une pizza", "un dragon miniature", "une porte transparente",
-    "un toaster", "une trottinette", "un cactus", "un trombone", "un donut",
-    "un cupcake", "une galette"
-]
-
-
 
 def afficher_info_inutile(label):
-    message = f"{random.choice(subjects)} {random.choice(verbs)} {random.choice(objects)}."
+    '''Affiche une information inutile aléatoire sur l'interface graphique.'''
+    # Choisir une information inutile aléatoire
+    message = f"{random.choice(infos_inutiles)}."
+    # Afficher l'information sur le label
     label.config(text="📢 Flash Info : " + message)
