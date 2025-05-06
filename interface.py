@@ -12,7 +12,7 @@ import os
 import pygame
 
 from courbes import generer_pourcentage_augmentation, application_variation
-from utils import Entreprise, Portefeuille
+from utils import Entreprise, Portefeuille, afficher_info_inutile
 from sauvegardes import sauvegarder_partie, charger_partie, supprimer_sauvegarde, lister_sauvegardes
 from musique import jouer_musiques
 
@@ -275,7 +275,7 @@ class PageTwo(tk.Frame):
         for nom in musique_fichiers:
             menuDeroulant.add_command(label=nom, command=lambda nom=nom:jouer_musiques(nom))
 
-        # Attribution du menu déroulant au menu Affichage
+        # Attribution du menu déroulant au menu Musique
         menuMusique.configure(menu=menuDeroulant)
         menuMusique.pack(pady=10, padx=10)
 
@@ -424,7 +424,19 @@ class PageThree(tk.Frame):
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         self.mettre_a_jour_graphique()
+        
+        self.label_info = tk.Label(self, text="", font=("Arial", 10), fg="gray")
+        self.label_info.pack(side="bottom", pady=5)
+        self.mettre_a_jour_info()
+        
 
+
+
+
+    def mettre_a_jour_info(self):
+        afficher_info_inutile(self.label_info)
+        self.after(20000, self.mettre_a_jour_info)
+        
 
     def acheter_action(self, entreprise : object) -> None:
         """Acheter une action de l'entreprise spécifiée."""

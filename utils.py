@@ -1,3 +1,6 @@
+# Importation des modules nécessaires
+import random
+
 #Fonctions utiles
 class Entreprise:
     '''Classe représentant une entreprise avec un nom, une valeur et une variation de valeur.
@@ -55,6 +58,9 @@ class Entreprise:
     def get_historique(self) -> dict:
         '''Retourne l'historique des valeurs de l'entreprise.'''
         return self.historique
+    
+    def get_debut_historique(self) -> int:
+        return self.historique["debut"]
 
     def get_all(self) -> dict:
         '''Retourne toutes les informations de l'entreprise sous forme de dictionnaire.'''
@@ -121,3 +127,38 @@ class Portefeuille:
     def modifier_actions(self, actions : dict) -> None:
         '''Modifie le dictionnaire des actions possédées dans le portefeuille.'''
         self.actions = actions
+
+# Lists to generate silly info messages
+subjects = [
+    "Le hamster du trader", "Une licorne", "Un pigeon", "Le café de la machine",
+    "Le stagiaire", "La photocopieuse", "L’imprimante", "Le robot aspirateur",
+    "La plante verte", "Le PDG", "Le chat", "Le chien", "Le poisson rouge",
+    "La souris", "Le cochon d'Inde", "Le lama", "Le kangourou", "Le panda",
+    "Le serpent", "Le robot", "Le fantôme", "Le squelette", "Le ninja",
+    "Le pirate", "Le dragon", "Le robot-cuiseur", "La télécommande", "La télé",
+    "Le grille-pain", "Le vélo"
+]
+
+verbs = [
+    "a piraté", "a dansé sur", "a dévoré", "a glissé sur", "a tweeté",
+    "a enchanté", "a hypnotisé", "a imprimé", "a téléporté", "a lancé",
+    "a vendu", "a acheté", "a peint", "a transformé", "a cassé",
+    "a réparé", "a chanté", "a sifflé", "a nagé dans", "a cuisiné",
+    "a exploré", "a ignoré", "a embrassé", "a endormi", "a réveillé",
+    "a effrayé", "a construit", "a déchaîné", "a fait pousser", "a planté"
+]
+
+objects = [
+    "un sandwich", "le Nasdaq", "une machine à café", "une licorne en peluche",
+    "une boule de cristal", "un fromage volant", "un nuage", "la blockchain",
+    "un sel de bain", "une chaussette", "le code source", "une banane",
+    "un arc-en-ciel", "une pizza", "un dragon miniature", "une porte transparente",
+    "un toaster", "une trottinette", "un cactus", "un trombone", "un donut",
+    "un cupcake", "une galette"
+]
+
+
+
+def afficher_info_inutile(label):
+    message = f"{random.choice(subjects)} {random.choice(verbs)} {random.choice(objects)}."
+    label.config(text="📢 Flash Info : " + message)
