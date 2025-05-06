@@ -1,5 +1,6 @@
-# importation des modules nécessaires
 # -*- coding: utf-8 -*-
+# # importation des modules nécessaires
+
 from utils import generer_liste_entreprises
 from interface import Ecran
 
