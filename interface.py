@@ -110,20 +110,20 @@ class StartPage(tk.Frame):
     def __init__(self, parent : object, controller : object = None) -> None:
         """Initialise la page d'accueil."""
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Start Page", font=("Helvetica", 20, "bold"), fg="#2e86de")
+        label = tk.Label(self, text="Page de demarrage", font=("Helvetica", 20, "bold"), fg="#2e86de")
         label.pack(pady=10, padx=10)
 
-        button = ttk.Button(self, text="Visit Page 1",
+        button = ttk.Button(self, text="Sauvegarder / Charger une partie",
                             style="custom.TButton",
                             command=lambda: controller.show_frame(PageOne))
         button.pack()
 
-        button2 = ttk.Button(self, text="Visit Page 2",
+        button2 = ttk.Button(self, text="Paramètres / musique",
                              command=lambda: controller.show_frame(PageTwo),
                              style="TButton")
         button2.pack()
 
-        button3 = ttk.Button(self, text="Graph Page",
+        button3 = ttk.Button(self, text="page de jeux",
                              command=lambda: controller.show_frame(PageThree),
                              style="TButton")
         button3.pack()
@@ -147,7 +147,7 @@ class PageOne(tk.Frame):
                              style="TButton")
         button1.pack()
 
-        button2 = ttk.Button(self, text="Page Two",
+        button2 = ttk.Button(self, text="Paramètres / musique",
                              command=lambda: controller.show_frame(PageTwo),
                              style="TButton")
         button2.pack()
@@ -495,7 +495,7 @@ class PageThree(tk.Frame):
             )
 
         # Appelle cette fonction toutes les 1000 ms (1 seconde)
-        self.after(1000, self.mettre_a_jour_graphique)
+        self.after(5000, self.mettre_a_jour_graphique)
 
     def load_data(self, entreprises : list, portefeuille : object) -> None:
         """Charge les données des entreprises et du portefeuille dans le graphique."""
@@ -558,4 +558,4 @@ class PageThree(tk.Frame):
         self.canvas.draw()
 
         # Redémarre les mises à jour
-        self._after_id = self.after(1000, self.mettre_a_jour_graphique)
+        self._after_id = self.after(5000, self.mettre_a_jour_graphique)
