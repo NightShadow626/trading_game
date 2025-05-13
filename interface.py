@@ -10,9 +10,10 @@ from tkinter import ttk
 from tkinter import *
 import os
 import pygame
+from tkinter import PhotoImage
 
 from courbes import generer_pourcentage_augmentation, application_variation
-from utils import Entreprise, Portefeuille, afficher_info_inutile
+from utils import Entreprise, Portefeuille, afficher_info_inutile, resource_path
 from sauvegardes import sauvegarder_partie, charger_partie, supprimer_sauvegarde, lister_sauvegardes
 from musique import jouer_musiques
 
@@ -25,9 +26,6 @@ config = {
     "style_courbe": "ligne",
     "couleurs": {}  # Nom de l'entreprise -> couleur choisie
 }
-
-DOSSIER_SAUVEGARDES = "saves"
-os.makedirs(DOSSIER_SAUVEGARDES, exist_ok=True)
 
 portefeuille = Portefeuille()
 
@@ -42,7 +40,9 @@ class Ecran(tk.Tk):
             entreprises = []  # Liste d'entreprises par défaut si aucune n'est fournie
         tk.Tk.__init__(self, *args, **kwargs)
 
-        tk.Tk.iconbitmap(self, default="icon.ico")  # Remplacer ou enlever si nécessaire
+        icon_path = resource_path("icon.png")
+        icon = PhotoImage(file=icon_path)
+        self.iconphoto(False, icon)
         tk.Tk.wm_title(self, "jeu de bourse")
 
         container = tk.Frame(self)
@@ -138,7 +138,7 @@ class PageOne(tk.Frame):
         self.portefeuille = portefeuille
         self.frames = frames
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
+        label = tk.Label(self, text="Sauvegarder / Charger une partie", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
         self.controller = controller
 
@@ -270,8 +270,13 @@ class PageTwo(tk.Frame):
         menuMusique = Menubutton(self, text='🎵 Muse ique', width='20', borderwidth=2, bg='gray', activebackground='darkred', activeforeground='white', relief=RAISED)
         # Création d'un menu défilant
         menuDeroulant = Menu(menuMusique)
-        musique_dossier = r'Muse'
-        musique_fichiers = [os.path.join(musique_dossier, f) for f in os.listdir(musique_dossier) if f.endswith('.mp3')]
+        musique_dossier = resource_path('Muse')
+        musique_fichiers = [
+            os.path.join(musique_dossier, f)
+            for f in os.listdir(musique_dossier)
+            if f.endswith('.mp3')
+        ]
+
         for nom in musique_fichiers:
             menuDeroulant.add_command(label=nom, command=lambda nom=nom:jouer_musiques(nom))
 

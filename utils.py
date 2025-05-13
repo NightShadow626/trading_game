@@ -186,3 +186,17 @@ def afficher_info_inutile(label):
     message = f"{random.choice(infos_inutiles)}."
     # Afficher l'information sur le label
     label.config(text="📢 Flash Info : " + message)
+
+import os
+import sys
+
+def resource_path(relative_path):
+    """Obtenir le chemin absolu vers une ressource, même si on est dans un .exe PyInstaller"""
+    try:
+        # PyInstaller crée un dossier temporaire et y place les fichiers
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # En mode développement
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
