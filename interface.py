@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Importation des modules nécessaires
+from turtle import bgcolor
+from webbrowser import BackgroundBrowser
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -52,9 +54,11 @@ class Ecran(tk.Tk):
 
         self.frames = {}
 
-        for F in (StartPage, PageTwo, PageThree, PageOne):
+        for F in (StartPage, PageFour, PageTwo, PageThree, PageOne):
             if F == PageThree or F == PageTwo:
                 frame = F(container, self, entreprises, portefeuille)
+            elif F == PageFour :
+                frame = F(container, self, portefeuille, self.frames)
             elif F == PageOne:
                 frame = F(container, self, entreprises, portefeuille, self.frames)
             else:
@@ -127,6 +131,13 @@ class StartPage(tk.Frame):
                              command=lambda: controller.show_frame(PageThree),
                              style="TButton")
         button3.pack()
+        button4 = tk.Button(self, text=" ", command=lambda: controller.show_frame(PageFour), bg = "White",relief="flat",
+                        background="White",
+                        foreground="White",
+                        highlightthickness=0,
+                        highlightbackground="White",
+                        highlightcolor="White",)
+        button4.pack(side=BOTTOM and RIGHT)
 
 
 class PageOne(tk.Frame):
@@ -564,3 +575,47 @@ class PageThree(tk.Frame):
 
         # Redémarre les mises à jour
         self._after_id = self.after(5000, self.mettre_a_jour_graphique)
+
+ 
+class PageFour(tk.Frame):
+    """Page pour le code triche"""
+
+    def __init__(self, parent : object, controller : object, portefeuille : object, frames : dict) -> None:
+        """Initialise la page."""
+        global config
+        self.portefeuille = portefeuille
+        self.frames = frames
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Page Four", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+        self.controller = controller
+    
+        button1 = ttk.Button(self, text="Back to Home",
+                             command=lambda: controller.show_frame(StartPage),
+                             style="TButton")
+        button1.pack()
+        self.code()
+
+
+    def code(self):
+        def valider():
+            code = name.get()
+            code = str(code)
+            if code == "L1IiXhC#":
+                pass
+            elif code == "EducNDA":
+                pass
+            elif code == "@6NRR!mdnNSo":
+                pass
+            elif code == "":
+                pass
+        label = Label( self, text="Enter code :")
+        label.pack()
+        name = Entry(self)
+        name.focus_set()
+        name.pack()
+
+        button2 = ttk.Button(self, text = "valider", command=valider)
+        button2.pack()
+
+    
