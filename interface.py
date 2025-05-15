@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # Importation des modules nécessaires
-from turtle import bgcolor
-from webbrowser import BackgroundBrowser
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -12,7 +10,8 @@ from tkinter import ttk
 from tkinter import *
 import os
 import pygame
-from tkinter import PhotoImage
+import ctypes
+import sys
 
 from courbes import generer_pourcentage_augmentation, application_variation
 from utils import Entreprise, Portefeuille, afficher_info_inutile, resource_path
@@ -65,6 +64,8 @@ class Ecran(tk.Tk):
                 frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
+        
+        self.appliquer_theme()
         
         style = ttk.Style()
         style.theme_use('default')
@@ -351,6 +352,8 @@ class PageThree(tk.Frame):
     """Page pour afficher le graphique des entreprises."""
     def __init__(self, parent, controller, entreprises, portefeuille) -> None:
         """Initialise la page du graphique."""
+        global triche
+        triche = 0
         self.portefeuille = portefeuille
         tk.Frame.__init__(self, parent)
         self.entreprises = entreprises
@@ -471,9 +474,13 @@ class PageThree(tk.Frame):
     def update_portefeuille(self) -> None:
         """Met à jour l'affichage du portefeuille."""
         self.label_portefeuille.config(text=self.portefeuille.get_resume())
-
-
+    
+    def changer_triche():
+        global triche
+        triche = 1
+    
     def mettre_a_jour_graphique(self) -> None:
+        global triche
         """Met à jour le graphique et les informations affichées."""
         # Pour éviter d'empiler les appels
         if hasattr(self, "_after_id"):
@@ -482,6 +489,13 @@ class PageThree(tk.Frame):
         # Met à jour la variation des entreprises
         for e in self.entreprises:
             pourcentage = generer_pourcentage_augmentation(e.get_valeur(), e.get_variation())
+            
+            if triche == 0:
+                pass
+            elif triche == 1:
+                if pourcentage < 0:
+                    pourcentage = pourcentage * -1
+
             valeur, variation = application_variation(e.get_valeur(), pourcentage)
             e.update(valeur, variation)
 
@@ -511,7 +525,8 @@ class PageThree(tk.Frame):
             )
 
         # Appelle cette fonction toutes les 1000 ms (1 seconde)
-        self.after(5000, self.mettre_a_jour_graphique)
+        self.update_portefeuille()
+        self.after(2000, self.mettre_a_jour_graphique)
 
     def load_data(self, entreprises : list, portefeuille : object) -> None:
         """Charge les données des entreprises et du portefeuille dans le graphique."""
@@ -574,7 +589,7 @@ class PageThree(tk.Frame):
         self.canvas.draw()
 
         # Redémarre les mises à jour
-        self._after_id = self.after(5000, self.mettre_a_jour_graphique)
+        self._after_id = self.after(2000, self.mettre_a_jour_graphique)
 
  
 class PageFour(tk.Frame):
@@ -601,14 +616,20 @@ class PageFour(tk.Frame):
         def valider():
             code = name.get()
             code = str(code)
-            if code == "L1IiXhC#":
-                pass
+            if code == "D:":
+                for _ in range (5):
+                    ctypes.windll.user32.MessageBoxW(0, "bloquer", "D:", 1)
             elif code == "EducNDA":
-                pass
+                print("bien jouer mais vous avez perdu votre partie")
+                sys.exit()
             elif code == "@6NRR!mdnNSo":
-                pass
+                PageThree.changer_triche()
             elif code == "":
-                pass
+                self.portefeuille.ajouter_argent(10000)
+                self.update
+            elif code == "d'abord":
+                self.portefeuille.supprimer_action()
+                print("erreur detecter dans le systeme, dommage tu n'as plus d'action(s)")
         label = Label( self, text="Enter code :")
         label.pack()
         name = Entry(self)

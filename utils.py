@@ -111,6 +111,9 @@ class Portefeuille:
         return f"Argent disponible: {self.argent:.2f}€\n" + "\n".join(
             [f"{nom}: {qte} actions" for nom, qte in self.actions.items() if qte > 0]
         )
+
+    def supprimer_action(self):
+        self.actions = {}
     
     def get_argent(self) -> float:
         '''Retourne le montant d'argent disponible dans le portefeuille.'''
@@ -123,6 +126,9 @@ class Portefeuille:
     def modifier_argent(self, argent : float) -> None:
         '''Modifie le montant d'argent disponible dans le portefeuille.'''
         self.argent = argent
+    
+    def ajouter_argent(self, argent : float) -> None:
+        self.argent += argent
     
     def modifier_actions(self, actions : dict) -> None:
         '''Modifie le dictionnaire des actions possédées dans le portefeuille.'''
