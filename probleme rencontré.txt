@@ -1,2 +1,29 @@
-affichage matplotlib avec tkinter
-probleme sur le chargement de sauvegarde avec un probleme d'affichage du graphique
+Récapitulatif des problèmes rencontrés et solutions mises en place : 
+
+Import de NavigationToolbar2TkAgg
+Problème : NavigationToolbar2TkAgg indisponible dans les versions récentes de Matplotlib.
+Solution : remplacer par NavigationToolbar2Tk et canvas.draw() au lieu de canvas.show().
+
+Changement de couleur des courbes à chaque mise à jour
+Problème : appel multiple à ax.plot créait de nouvelles lignes avec couleurs aléatoires.
+Solution : créer et stocker les objets Line2D une seule fois et mettre à jour via set_xdata et set_ydata.
+
+Thème sombre partiel
+Problème : le thème sombre ne s'appliquait que sur la page 2.
+Solution : ajouter une méthode appliquer_theme() dans la classe principale pour parcourir toutes les pages et leurs widgets, et l'appeler dans show_frame et après basculement du thème.
+
+Tronquer l'historique pour alléger la sauvegarde
+Problème : historique complet trop volumineux.
+Solution : modifier la classe Entreprise pour stocker seulement les 100 derniers jours avec un champ debut, et adapter le tracé des courbes en conséquence.
+
+Rechargement d'une partie sans recréer la page
+Problème : recréer les frames causait des erreurs de références.
+Solution : ajouter méthode load_data() dans PageThree pour mettre à jour les données existantes et rafraîchir l'affichage sans recréer le widget.
+
+Gestion des sauvegardes
+Problème : sauvegardes multiples dans un seul fichier JSON inexistant.
+Solution : créer module sauvegarde.py avec un seul sauvegardes.json contenant toutes les parties, et fonctions sauvegarder_partie, charger_partie, lister_sauvegardes.
+
+Chargement des données du JSON
+Problème : recréer mal les objets Entreprise et Portefeuille depuis le JSON.
+Solution : dans PageOne, lire le JSON, réinstancier les entreprises avec historique, mettre à jour le portefeuille, puis appeler PageThree.load_data().

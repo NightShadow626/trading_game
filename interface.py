@@ -128,7 +128,7 @@ class StartPage(tk.Frame):
                              style="TButton")
         button2.pack()
 
-        button3 = ttk.Button(self, text="page de jeux",
+        button3 = ttk.Button(self, text="Page de jeu",
                              command=lambda: controller.show_frame(PageThree),
                              style="TButton")
         button3.pack()
@@ -431,6 +431,7 @@ class PageThree(tk.Frame):
 
             bouton_vendre = ttk.Button(cadre, text="Vendre", command=lambda e=e: self.vendre_action(e))
             bouton_vendre.pack(side=tk.LEFT, padx=2)
+
 
             self.boutons_entreprises[e.get_nom()] = (bouton_acheter, bouton_vendre)
 
