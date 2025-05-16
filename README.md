@@ -37,3 +37,5 @@ Sur la page d'accueil, trois options s'offrent à vous :
 
 ## 🕵️‍♂️ Astuce Secrète
 🔒 Un bouton caché existe sur la page de démarrage. Il vous permet d’entrer des codes secrets… mais attention, certains effets sont maléfiques 😈 !
+
+## Pour me soutenir : visiter [patreon](patreon.com/BlazeOfShadow)
